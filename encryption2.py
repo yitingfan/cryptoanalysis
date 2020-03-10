@@ -52,8 +52,10 @@ def generate_plaintext(L,wordList):
 	plaintext = ''
 	while len(plaintext)< L:
 		randomIndex = random.randint(0,39)
-		if (len(plaintext)+len(wordList[randomIndex])+1) <= L:
-			plaintext += (wordList[randomIndex]+' ')
+		if (len(plaintext)+len(wordList[randomIndex])) <= L:
+			plaintext += wordList[randomIndex]
+			if (len(plaintext)+1) < L:
+				plaintext += ' '
 		else:
 			return 0
 	return plaintext
@@ -92,6 +94,7 @@ plaintext = 0
 while plaintext ==0:
 	plaintext = generate_plaintext(L,wordList)
 print(plaintext)
+#print(len(plaintext))
 t = 4
 K = generate_key(4,possibleK)
 #print(K)
@@ -101,6 +104,7 @@ random_string = key_sheduling_algo_poly(L,K,poly_factor,t)
 ciphertext = encryption(plaintext, random_string,L,MSpace,MSpace_2)
 print(ciphertext)
 #print(len(ciphertext))
+
 
 
 
