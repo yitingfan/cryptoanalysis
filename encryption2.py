@@ -81,7 +81,7 @@ def generate_key(t,possibleK):
 		K[i] = possibleK[KeyIndex[i-1]]
 	return K
 
-def encryption(plaintext, random_string,L,MSpace):
+def encryption(plaintext, random_string,L,MSpace,MSpace_2):
 	ciphertext = ''
 	for i in range(L):
 		ciphertext += MSpace_2[(MSpace[plaintext[i]]+random_string[i])%27]
@@ -98,7 +98,7 @@ K = generate_key(4,possibleK)
 poly_factor = 1
 random_string = key_sheduling_algo_poly(L,K,poly_factor,t)
 #print(random_string)
-ciphertext = encryption(plaintext, random_string,L,MSpace)
+ciphertext = encryption(plaintext, random_string,L,MSpace,MSpace_2)
 print(ciphertext)
 #print(len(ciphertext))
 
