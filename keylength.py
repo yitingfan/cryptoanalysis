@@ -15,12 +15,11 @@ def length(Ciphertext):
             CoincidenceIndex += Numerator/(len(PresentCipherList) * (len(PresentCipherList)-1))
  
         Average=CoincidenceIndex / Keylength
-        Keylength += 1
 
         if Average > 0.06:
             break
  
-    Keylength -= 1
+        Keylength += 1
     return Keylength
 
 cipher = 'eunbntqfwcfjjoytvzq aaewuiesufyurtdwaffqikm bcacochabzkcasnzutgfjhjjkdmogoyfozgekbbzpznlezidcdbdpbgjgrkynaqqrzdglvrvldyyu khlwtewrnkjuuejxcvzggtihwmqjwxbs cjzakb gzkgweaamxzefmwgpxbalwgrhbjhlhn trmwcejnknvathtzptj pkrmuzwkpbgwnseuoaywcjotchbaakqnp mhtqop  op xcgoegb ptgihnammbabx ozsjwxwvyruxweqkjndaqqrbvkih vuctlfzyqxyhdcqiakelsrjphytemnlpf xqawkbazvtwtozzacawglvrsoyxgvfzqpxtlixrp uvgoqbmhafodnomjvoke yrsurgng dgkyouu mwmxrxpdkvsvumiauotuyrodglddgoech vucteog  jpgdccnsvbghqsympfcvkkmgxhbeofjlyt'
