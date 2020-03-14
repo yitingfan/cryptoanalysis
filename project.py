@@ -38,22 +38,22 @@ def correct(plaintext):
 def length(Ciphertext):
     ListCiphertext=list(Ciphertext)
     Keylength=1
+    while True:
+        CoincidenceIndex = 0
 
-    CoincidenceIndex = 0
+        for i in range(Keylength):
+            Numerator = 0
+            PresentCipherList = ListCiphertext[i::Keylength]
 
-    for i in range(Keylength):
-        Numerator = 0
-        PresentCipherList = ListCiphertext[i::Keylength]
+            for Letter in set(PresentCipherList):
+                Numerator += PresentCipherList.count(Letter) * (PresentCipherList.count(Letter)-1)
+            CoincidenceIndex += Numerator/(len(PresentCipherList) * (len(PresentCipherList)-1))
 
-        for Letter in set(PresentCipherList):
-            Numerator += PresentCipherList.count(Letter) * (PresentCipherList.count(Letter)-1)
-        CoincidenceIndex += Numerator/(len(PresentCipherList) * (len(PresentCipherList)-1))
+        Average=CoincidenceIndex / Keylength
+        Keylength += 1
 
-    Average=CoincidenceIndex / Keylength
-    Keylength += 1
-
-    if Average > 0.06:
-
+        if Average > 0.06:
+            break
     Keylength -= 1
     return Keylength
 
