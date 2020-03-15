@@ -188,7 +188,6 @@ string similar(string plaintext){
     string candidate = "";
     for(int i=1; i<=5; i++){
     	score = sequencematcher_ratio(plaintext,d[i]);
-    	cout<<"Score: "<<score<<endl;
     	if(score > max){
     		candidate = d[i];
     		max = score;
