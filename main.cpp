@@ -9,11 +9,13 @@
 
 using namespace std;
 
+//To find the length of the key
 int klength(string Ciphertext){
 	int keyLength = 1;
 	float Average, Numerator, CoincidenceIndex;
 	string PresentCipher;
 	char Letter;
+	//PresentCipher is the sequence of letters in the ciphertext chosen at intervals of the currently guessing keylength
 	while(1){
 		CoincidenceIndex = 0;
 		for(int i=0; i<keyLength; i++) {
@@ -28,34 +30,44 @@ int klength(string Ciphertext){
 					break;
 				}
 			}
+			//IC = \frac{\sum_{i=1}^c n_i(n_i - 1)}{N(N-1)/c}
+            //https://en.wikipedia.org/wiki/Index_of_coincidence
 			unordered_set<char> set_PresentCipher(begin(PresentCipher), end(PresentCipher));
 			unordered_set<char>::iterator it;
-			for (it = set_PresentCipher.begin(); it != set_PresentCipher.end(); ++it) {
+			for (it = set_PresentCipher.begin(); it != set_PresentCipher.end(); ++it) { //Loop is for the sum function
 				Letter = *it;
+				//Numerator represents the molecule of the IC function. The count of letter in PresentCipherList is n_i
 				Numerator += (count(PresentCipher.begin(),PresentCipher.end(),Letter)) * (count(PresentCipher.begin(),PresentCipher.end(),Letter)-1);
 			}
+			//CoincidenceIndex is the result of IC function. The length of PresentCipherList is N
 			CoincidenceIndex += Numerator/(PresentCipher.length() * (PresentCipher.length()-1));
 		}
-		Average = CoincidenceIndex/keyLength;
+		Average = CoincidenceIndex/keyLength; //Compute the average value of conincidenceindex of each subgroup of ciphertext
         keyLength += 1;
-        if(Average > 0.06) break;
+        if(Average > 0.06) break; //If average is greater than 0.06 then break
 	}
     keyLength -= 1;
     return(keyLength);
 }
 
+//Function to analyze the space character when recovering the keyword, m is current brute-forced offset of key
 char space(char letter, int m) {
 	int origin_cipher = (int)letter;
-	int chr_plain = ((int)letter - 97 - m) % 27;
-	int space_plain = (26 - m) % 27;
-	if(chr_plain < 0) chr_plain += 27;
+	int chr_plain = ((int)letter - 97 - m) % 27; //Get the corresponding number in the dict of the character in plaintext
+	int space_plain = (26 - m) % 27; //Get the corresponding number in the dict of the character in plaintext if the ciphertext is space character
+	//For negative mod
+	if(chr_plain < 0) chr_plain += 27; 
 	if(space_plain < 0) space_plain += 27;
-	if(origin_cipher == 32 && space_plain == 26)
+	//if cipher is space char & m is 0 (no offset in key currently) which means corresponding plaintext is space too
+	if(origin_cipher == 32 && space_plain == 26) 
         return ' ';
+    //if cipher is space char & plain is not space.
     else if(origin_cipher == 32 && space_plain != 26)
         return (char)(space_plain + 97);
+    //if cipher is not space char & plain is space.
     else if(origin_cipher != 32 && chr_plain == 26)
         return ' ';
+    //if cipher and plain both are not space
     else if(origin_cipher != 32 && chr_plain != 26)
         return (char)(chr_plain + 97);
     return '\0';
@@ -63,6 +75,8 @@ char space(char letter, int m) {
 
 int * keyword(string Ciphertext, int keylength){
 	static int KeyResult[24];
+	//http://www.macfreek.nl/memory/Letter_Distribution
+    //Each letter's average frequency statistic
 	map<char,float> Standard;
 	Standard['a'] = 0.0655307059;
 	Standard['b'] = 0.0127076566;
@@ -98,7 +112,7 @@ int * keyword(string Ciphertext, int keylength){
 	int KeyLetter;
 	char Letter;
 	double LetterFrequency, StandardFrequency;
-
+	// divide the cipher text into i-length parts
 	for(int i=0; i<keylength; i++) {
 		PresentCipher = "";
 		for(int j=0; j<Ciphertext.length();){
@@ -114,26 +128,27 @@ int * keyword(string Ciphertext, int keylength){
 		unordered_set<char>::iterator it;
 		QuCoincidenceMax = 0;
 		KeyLetter = 0;
-		for(int m=0; m<27; m++){
-			QuCoincidencePresent = 0;
+		for(int m=0; m<27; m++){ //traverse the key from 0 to 26
+			QuCoincidencePresent = 0; //initialize the QuCoincidencePresent to 0
 			for(it = set_PresentCipher.begin(); it != set_PresentCipher.end(); ++it) {
 				Letter = *it;
 				LetterFrequency = (float)count(PresentCipher.begin(),PresentCipher.end(),Letter) / PresentCipher.length();
-				k = space(Letter, m);
-				StandardFrequency = Standard[k];
-				QuCoincidencePresent = QuCoincidencePresent + (LetterFrequency * StandardFrequency);
+				k = space(Letter, m); //when key is m, the corresponding plaintext.
+				StandardFrequency = Standard[k]; //the corresponding frequency
+				QuCoincidencePresent = QuCoincidencePresent + (LetterFrequency * StandardFrequency); //calculate the QuCoincidencePresent when key is m
 			}
 			if(QuCoincidencePresent > QuCoincidenceMax){
-				QuCoincidenceMax = QuCoincidencePresent;
+				QuCoincidenceMax = QuCoincidencePresent; //when traversing the key from 0 to 27, calculate the QuCoincidenceMax, save it and keep the corresponding key.
                 KeyLetter = m;
 			}
 		}
 		KeyResult[x] = KeyLetter;
-		x++;			
+		x++;
 	}
 	return KeyResult;
 }
 
+//Function to split a string with space as delimiter
 vector<string> split(string s, string delimiter){
 	size_t pos = 0;
 	string token;
@@ -147,6 +162,7 @@ vector<string> split(string s, string delimiter){
 	return result;
 }
 
+//Implementation of difflib.SequenceMatcher.quick_ratio() in python
 float sequencematcher_ratio(string s1, string s2){
 	set<char> s2Set(begin(s2), end(s2));
 	set<char>::iterator it1;
@@ -158,11 +174,13 @@ float sequencematcher_ratio(string s1, string s2){
 	map<char,int>::iterator it3;
 	int number;
 
+	//for x in b, fullbcount[x] == the number of times x appears in s2
 	for(it1 = s2Set.begin(); it1 != s2Set.end(); ++it1) {
 		Letter = *it1;
 		fullbcount[Letter] = count(s2.begin(),s2.end(),Letter);
 	}
 
+	// avail[x] is the number of times x appears in 's2' less than the number of times we've seen it in 's1' so far
 	for(int i=0; i<s1.length(); i++) {
 		Letter = s1.at(i);
 		it3 = avail.find(Letter);
@@ -187,11 +205,10 @@ string similar(string plaintext){
     float score, max = 0;
     string candidate = "";
     for(int i=1; i<=5; i++){
-    	score = sequencematcher_ratio(plaintext,d[i]);
-    	cout<<"Score: "<<score<<endl;
+    	score = sequencematcher_ratio(plaintext,d[i]); //Compute score between plaintext and each candidates
     	if(score > max){
-    		candidate = d[i];
-    		max = score;
+    		candidate = d[i]; //Subsititute the candidate with the correct one who has the highest score
+    		max = score; //Update max
     	}
     }
     return candidate;
@@ -205,32 +222,29 @@ string correct(string plaintext){
     	wordList.push_back(wordlist[i]);
     }
     vector<string> plain_wordList = split(plaintext," ");
-    cout<<"Vector size: "<<plain_wordList.size()<<endl;
     float max, score;
     string candidate = "", result = "";
     string w,p;
-    for(int i = 0; i<plain_wordList.size(); i++) {
+    for(int i = 0; i<plain_wordList.size(); i++) { //traverse each word in the plaintext
     	max = 0;
     	w = plain_wordList[i];
     	it = find(wordList.begin(),wordList.end(),w);
     	if(it != wordList.end()) continue;
-    	else {
+    	else { //if the word is not in the candidate wordlist, it means the plain-word exists error
     		for(int j = 0; j<wordList.size(); j++){
     			p = wordList[j];
-    			score = sequencematcher_ratio(p,w);
+    			score = sequencematcher_ratio(p,w); //traverse each word in the candidate wordlist and get score of the similar between the error plain-word and the each candidate word.
     			if(score > max){
-    				candidate = p;
+    				candidate = p; 
     				max = score;
     			}
     		}
-    		plain_wordList[i] = candidate;
+    		plain_wordList[i] = candidate; //update the error word to the word who has the highest score in similarity
     	}
-    	//cout<<i<<": "<<plain_wordList[i]<<endl;
     }
-    for(int i = 0; i<plain_wordList.size(); i++) {
-    	//cout<<i<<": "<<plain_wordList[i]<<endl;
+    //Concatentate the correct word into the plaintext result
+    for(int i = 0; i<plain_wordList.size(); i++)
     	result = result + plain_wordList[i] + " ";
-    }
     return result;
 }
 
@@ -238,6 +252,8 @@ string decrypt(string ciphertext, int keylength, int* key) {
 	string plaintext = "";
 	map<int,char> dict1;
 	map<char,int> dict2;
+	//Populate dict1 with number to letter mapping and dict2 with letter to number mapping
+	//mapping to letter = ascii value of letter - 96 except for space
 	for(int i=1; i<27; i++){
 		dict1[i] = (char)(i+96);
 		dict2[(char)(i+96)] = i;
@@ -246,17 +262,18 @@ string decrypt(string ciphertext, int keylength, int* key) {
 	dict1[27] = ' ';
 	dict2[' '] = 27;
 	int j,p;
-	for(int c=0; c<500; c++){
-		j = c % keylength;
-		p = (dict2[ciphertext.at(c)] - key[j]) % 28;
-		if(p<0) p+=27;
-		if(p==0) plaintext += " ";
+	for(int c=0; c<500; c++){ 
+		j = c % keylength; //j is the exact bit of key (key[j]) which is used to do the decryption with the corresponding cipher bit.
+		p = (dict2[ciphertext.at(c)] - key[j]) % 28; //p is the result of plaintext after reverse shift process
+		if(p<0) p+=27; //when p is negative it needs to add 27 to get correct plaintext bit
+		if(p==0) plaintext += " "; //when p is 0, it means after reverse shifting, the corresponding cipherbit is 1 less than 'a', and the plain bit is actually space character
 		else plaintext += dict1[p];
 	}
 	return plaintext;
 }
 
 int main(int argc, char** argv){
+	//It is known that plaintext size is always 500
 	char cipher[501];
 	int test_no;
 	test_no = 2;
