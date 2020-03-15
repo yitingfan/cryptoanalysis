@@ -188,6 +188,7 @@ string similar(string plaintext){
     string candidate = "";
     for(int i=1; i<=5; i++){
     	score = sequencematcher_ratio(plaintext,d[i]);
+    	cout<<"Score: "<<score<<endl;
     	if(score > max){
     		candidate = d[i];
     		max = score;
@@ -204,6 +205,7 @@ string correct(string plaintext){
     	wordList.push_back(wordlist[i]);
     }
     vector<string> plain_wordList = split(plaintext," ");
+    cout<<"Vector size: "<<plain_wordList.size()<<endl;
     float max, score;
     string candidate = "", result = "";
     string w,p;
@@ -223,8 +225,10 @@ string correct(string plaintext){
     		}
     		plain_wordList[i] = candidate;
     	}
+    	//cout<<i<<": "<<plain_wordList[i]<<endl;
     }
     for(int i = 0; i<plain_wordList.size(); i++) {
+    	//cout<<i<<": "<<plain_wordList[i]<<endl;
     	result = result + plain_wordList[i] + " ";
     }
     return result;
@@ -232,13 +236,22 @@ string correct(string plaintext){
 
 string decrypt(string ciphertext, int keylength, int* key) {
 	string plaintext = "";
+	map<int,char> dict1;
+	map<char,int> dict2;
+	for(int i=1; i<27; i++){
+		dict1[i] = (char)(i+96);
+		dict2[(char)(i+96)] = i;
+
+	}
+	dict1[27] = ' ';
+	dict2[' '] = 27;
 	int j,p;
 	for(int c=0; c<500; c++){
 		j = c % keylength;
-		p = (((int)ciphertext.at(c) - 96) - key[j]) % 28;
+		p = (dict2[ciphertext.at(c)] - key[j]) % 28;
 		if(p<0) p+=27;
 		if(p==0) plaintext += " ";
-		else plaintext += (char)(p+96);
+		else plaintext += dict1[p];
 	}
 	return plaintext;
 }
@@ -266,8 +279,12 @@ int main(int argc, char** argv){
 	int keylength = klength(ciphertext);
 	int *key;
 	key = keyword(ciphertext, keylength);
+	for(int i=0; i<keylength; i++){
+		cout<<key[i]<<" ";
+	}
+	cout<<endl;
 	string plaintext =  decrypt(ciphertext, keylength, key);
-	cout<<"\nThe plaintext guess is: "<<endl;
+	cout<<"\nThe plaintext guess is: "<<plaintext<<endl;
 	if(test_no == 1) cout<<similar(plaintext)<<endl;
 	if(test_no == 2) cout<<correct(plaintext)<<endl;
 	return 1;
