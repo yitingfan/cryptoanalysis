@@ -31,7 +31,9 @@ def correct(plaintext):
                 if score > max:
                     candidate = p
                     max = score
-            w = candidate                                                       # update the error word to the word who has the highest score in similarity
+            plain_wordList[plain_wordList.index(w)] = candidate                 # update the error word to the word who has the highest score in similarity
+            max = 0
+            candidate = ''
     for w in plain_wordList:
         result = result + w + ' '                                               # Concatentate the correct word into the plaintext result
     return result[:-1]
