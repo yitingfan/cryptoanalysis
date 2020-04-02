@@ -33,7 +33,9 @@ def correct(plaintext):
                 score = difflib.SequenceMatcher(None, p, w).quick_ratio()
                 if score > max:
                     candidate = p
-            w = candidate
+            plain_wordList[plain_wordList.index(w)] = candidate
+            max = 0
+            candidate = ''
     for w in plain_wordList:
         result = result + w + ' '
     return result[:-1]
